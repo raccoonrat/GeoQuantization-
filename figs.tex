@@ -1,0 +1,122 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TikZ Illustrations for FSGD & Lattice Framework
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usepackage{xeCJK}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing, shapes.geometric}
+% 中文字体设置
+\setCJKmainfont{SimSun}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 1: Functional–Sensitive Geometric Decomposition (FSGD)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[scale=1.2, every node/.style={font=\footnotesize}]
+% Main manifold
+\shade[ball color=blue!20, opacity=0.5] (0,0) ellipse (3 and 1.5);
+\node at (0,-1.8) {\textbf{主功能流形 (Functional Manifold)}};
+
+% High curvature spikes
+\foreach \x in {-1.2, 0.4, 1.8} {
+  \draw[red!80!black, ultra thick, decorate, decoration={snake, amplitude=2pt, segment length=6pt}] 
+  (\x, {1.5 - 0.5*rand}) -- (\x, {2.2 + 0.4*rand});
+}
+\node[red!70!black] at (1.5,2.5) {尖峰 (High Curvature Spikes)};
+
+% Off-manifold islands
+\foreach \pos in {(4,0.8), (-3.5,-0.5), (3,-1.2)}{
+  \shade[ball color=orange!20, opacity=0.7] \pos circle (0.6);
+}
+\node[orange!70!black] at (4.3,1.5) {离岛 (Off-Manifold Islands)};
+
+% Arrows to show flow
+\draw[->, thick, gray!70] (-4,0) -- (4.8,0) node[below right]{几何方向 (Geometric Axis)};
+\draw[->, thick, gray!70] (0,-2) -- (0,3) node[above]{曲率/敏感性};
+
+% Legend
+\node[draw, fill=white, align=left, font=\scriptsize, below right=0.5cm of current bounding box.south west, text width=5cm] (legend) {
+\textbf{FSGD 概念：}\\
+-- 蓝色椭圆：功能流形\\
+-- 橙色圆：敏感离群岛\\
+-- 红色曲线：高曲率尖峰
+};
+\end{tikzpicture}
+\caption{Functional–Sensitive Geometric Decomposition (FSGD): 
+The LLM weight space exhibits a layered manifold geometry with 
+(1) a smooth functional manifold (blue), 
+(2) isolated off-manifold islands (orange), and 
+(3) high-curvature spikes (red) coupling functionality and sensitivity.}
+\label{fig:FSGD}
+\end{figure*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 2: Perturbation Response Mapping (PRM)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=1.1, every node/.style={font=\footnotesize}]
+% Axes
+\draw[->, thick] (0,0) -- (5,0) node[below right]{\(\Delta \text{PPL}\)};
+\draw[->, thick] (0,0) -- (0,4) node[left]{\(\Delta \text{AUC}\)};
+
+% Functional trajectory
+\draw[blue!70!black, ultra thick, smooth, tension=0.9]
+(0.2,0.3) .. controls (1,0.5) and (3,1.2) .. (4,3);
+\node[blue!70!black] at (4.2,2.8) {功能区轨迹};
+
+% Sensitive trajectory
+\draw[orange!80!black, ultra thick, dashed, smooth]
+(0.3,3.5) .. controls (1.2,3) and (2,2) .. (4,1);
+\node[orange!80!black] at (4.1,1.3) {敏感区轨迹};
+
+% Mixed trajectory
+\draw[red!70!black, ultra thick, dotted, smooth]
+(0.2,0.3) .. controls (1.5,1.8) and (2.5,2.2) .. (4.2,2.5);
+\node[red!70!black] at (4.3,2.4) {混合区轨迹};
+
+% Phase labels
+\node[font=\scriptsize] at (2,3.8) {隐私改善方向};
+\node[font=\scriptsize] at (4.7,0.2) {精度下降方向};
+\end{tikzpicture}
+\caption{Perturbation Response Mapping (PRM): 
+Distinct subspaces (\(\mathcal{W}_{func}, \mathcal{W}_{sens}, \mathcal{W}_{both}\)) 
+show separable trajectories in the (\(\Delta \text{PPL}, \Delta \text{AUC}\)) phase space.}
+\label{fig:PRM}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 3: Lattice–Quantization Geometry
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[scale=0.9, every node/.style={font=\footnotesize}]
+% Lattice grid
+\foreach \x in {0,0.6,...,3.6}{
+  \foreach \y in {0,0.6,...,3.6}{
+    \fill[gray!40] (\x,\y) circle (1pt);
+  }
+}
+% Basis vectors
+\draw[->, thick, blue!70!black] (0,0) -- (1.2,0.3) node[below right]{\(\mathbf{b}_1\)};
+\draw[->, thick, blue!70!black] (0,0) -- (0.5,1.1) node[left]{\(\mathbf{b}_2\)};
+% Target & projection
+\fill[red!70!black] (2.8,2.1) circle (2pt) node[above right]{目标向量 \(\mathbf{t}\)};
+\fill[orange!80!black] (2.4,2.4) circle (2pt) node[below left]{近似格点 \(\mathbf{v}\)};
+\draw[dashed, orange!70!black, thick] (2.8,2.1) -- (2.4,2.4);
+% Orthogonalization arrows
+\draw[dotted, gray!70] (1.2,0.3) -- (1.2,1.5);
+\draw[dotted, gray!70] (0.5,1.1) -- (2.5,1.1);
+% Caption text
+\node[align=left, font=\scriptsize, below=0.4cm of current bounding box.south]{
+蓝色向量形成格基 \(B=[\mathbf{b}_1,\mathbf{b}_2]\)。红点为目标向量 \(\mathbf{t}\)，
+橙点为 Babai 算法找到的近似格向量 \(\mathbf{v}\)。
+误差向量反映格正交性对量化精度的影响。
+};
+\end{tikzpicture}
+\caption{Lattice–Quantization Geometry: Babai projection from target vector 
+\(\mathbf{t}\) onto lattice basis vectors \(\mathbf{b}_1, \mathbf{b}_2\). 
+Poor orthogonality yields larger quantization error.}
+\label{fig:lattice}
+\end{figure}

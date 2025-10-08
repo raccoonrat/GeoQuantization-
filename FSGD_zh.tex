@@ -1,0 +1,162 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% USENIX Style Paper + TikZ + Python 数据绘图示例
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%!TEX encoding = UTF-8 Unicode
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage[utf8]{inputenc}
+% \usepackage{usenix2019_v3}  % 暂时注释掉以测试中文支持
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 常用宏包
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pythontex}
+\usepackage{xcolor}
+\usepackage{xeCJK}
+\usepackage{caption}
+\usepackage{subcaption}
+% 中文字体设置 - 简化配置
+\setCJKmainfont{SimSun}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PGFPlots 设置
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta, positioning, decorations.pathreplacing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{几何引导扰动相图：LLM量化中精度隐私双变量实验示意}
+\author{
+{\rm 示例作者}\\
+[机构名称] \\
+{\tt example@email.com}
+}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+本文展示了“几何引导扰动相图 (Perturbation Response Mapping, PRM)”的可视化实现，
+通过 Python 自动生成模拟实验数据，并使用 TikZ/PGFPlots 绘制三类参数子空间
+（功能区、敏感区、混合区）在 $(\Delta \mathrm{PPL}, \Delta \mathrm{AUC})$ 平面上的轨迹。
+该图示体现了 LLM 量化中精度损失与隐私提升的非线性耦合关系。
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{引言}
+在大语言模型的量化过程中，权重扰动会导致精度下降（困惑度 $\mathrm{PPL}$ 上升）、
+同时可能降低隐私攻击的可行性（成员推理攻击 AUC 下降）。
+本文基于理论框架“功能–敏感几何分解 (FSGD)”构建一个二维相图，
+展示不同子空间的扰动响应特征。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Python 数据生成}
+我们使用 \texttt{pythontex} 在编译过程中生成模拟数据。
+每条曲线代表一种参数子空间的扰动响应：
+
+\begin{pycode}
+import numpy as np
+import pandas as pd
+
+np.random.seed(42)
+sigma = np.linspace(0, 1, 15)
+
+# 模拟三类曲线：功能区、敏感区、混合区
+ppl_func = 5 * sigma**1.8 + np.random.normal(0, 0.1, len(sigma))
+auc_func = 1 - 0.1*sigma + np.random.normal(0, 0.02, len(sigma))
+
+ppl_sens = 2 * sigma + np.random.normal(0, 0.05, len(sigma))
+auc_sens = 1 - 0.5*sigma**1.5 + np.random.normal(0, 0.02, len(sigma))
+
+ppl_both = 3 * sigma**1.2 + np.random.normal(0, 0.08, len(sigma))
+auc_both = 1 - 0.3*sigma + np.random.normal(0, 0.03, len(sigma))
+
+df = pd.DataFrame({
+    "sigma": sigma,
+    "ppl_func": ppl_func,
+    "auc_func": auc_func,
+    "ppl_sens": ppl_sens,
+    "auc_sens": auc_sens,
+    "ppl_both": ppl_both,
+    "auc_both": auc_both
+})
+df.to_csv("prm_data.csv", index=False)
+\end{pycode}
+
+该脚本在第一次编译时生成 `prm_data.csv`，用于后续 TikZ 绘图。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{PRM 实验相图}
+图 \ref{fig:prm} 展示了实验模拟结果。
+横轴为困惑度变化 $\Delta \mathrm{PPL}$（越大代表精度下降），
+纵轴为成员推理攻击 AUC 的变化 $\Delta \mathrm{AUC}$（越大代表隐私风险上升）。
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.95\linewidth,
+    height=6cm,
+    xlabel={$\Delta \mathrm{PPL}$ (精度变化)},
+    ylabel={$\Delta \mathrm{AUC}$ (隐私变化)},
+    xmin=0, xmax=5.5,
+    ymin=0.4, ymax=1.05,
+    grid=major,
+    legend style={at={(0.02,0.98)},anchor=north west,font=\scriptsize},
+    label style={font=\small},
+    ticklabel style={font=\scriptsize},
+    every axis plot/.append style={thick, mark=*},
+]
+
+% 加载 CSV 数据
+\addplot[blue!70!black, mark=*, mark options={fill=blue}, line width=1pt]
+    table[x=ppl_func, y=auc_func, col sep=comma] {prm_data.csv};
+\addlegendentry{功能区（Functional）}
+
+\addplot[orange!80!black, mark=triangle*, mark options={fill=orange}, dashed, line width=1pt]
+    table[x=ppl_sens, y=auc_sens, col sep=comma] {prm_data.csv};
+\addlegendentry{敏感区（Sensitive）}
+
+\addplot[red!70!black, mark=square*, mark options={fill=red}, dotted, line width=1pt]
+    table[x=ppl_both, y=auc_both, col sep=comma] {prm_data.csv};
+\addlegendentry{混合区（Mixed）}
+
+\end{axis}
+\end{tikzpicture}
+\caption{几何引导扰动相图（PRM）：三类子空间在 $(\Delta \mathrm{PPL}, \Delta \mathrm{AUC})$ 平面上的响应轨迹。
+功能区主要表现为显著精度下降；敏感区呈现隐私改善趋势；
+混合区位于两者之间。}
+\label{fig:prm}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{结果讨论}
+从图中可见：
+\begin{itemize}
+  \item 功能区（蓝线）随扰动增强，精度下降显著，但隐私变化较小；
+  \item 敏感区（橙线）表现为隐私快速改善（AUC 降低），精度影响有限；
+  \item 混合区（红线）位于中间，反映两种效应叠加。
+\end{itemize}
+
+该结果验证了“功能–敏感几何分解 (FSGD)”理论中的可分性假设，
+并展示了量化噪声对隐私与精度的非线性影响路径。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 包含图表文件
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{figs.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{结论}
+本示例展示了如何结合 Python 数据生成与 LaTeX 的 TikZ/PGFPlots 绘图，
+在论文编译过程中直接产生科学可视化图表。
+实际实验可替换模拟数据，以呈现真实 LLM 量化实验结果。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}

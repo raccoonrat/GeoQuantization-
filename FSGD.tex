@@ -1,0 +1,197 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% USENIX Paper Template for "Outlier Geometry and Privacy–Accuracy Duality in LLM Quantization"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix2019_v3}
+\input{figs.tex}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{\Large \bf Outlier Geometry and Privacy–Accuracy Duality in LLM Quantization: 
+A Lattice–Manifold Theoretic Framework}
+
+\author{
+{\rm [Your Name]}\\
+[Your University]\\
+{\tt your.email@domain.com}
+}
+
+\maketitle
+
+\begin{abstract}
+This paper proposes a geometric–algebraic framework for understanding outlier phenomena in large language model (LLM) quantization. We formulate the dual nature of outliers—functional and sensitive—within a nonlinearly separable manifold geometry, and link the resulting structure to lattice quantization theory through the Babai nearest-plane algorithm. The theoretical insights connect geometric curvature, Hessian eigenspectra, and privacy–accuracy trade-offs, supported by an experimental methodology based on geometric-guided perturbation and lattice stability analysis.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+LLM quantization offers efficiency but introduces nontrivial accuracy and privacy effects. 
+We identify a duality: certain \emph{outlier weights} encode critical generalization (functional outliers), while others memorize sensitive data (sensitive outliers). 
+This work builds a unified mathematical bridge between geometric separability and lattice-based quantization error, offering quantitative tools for privacy-aware compression.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Functional–Sensitive Geometric Decomposition (FSGD)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Conceptual Overview}
+We hypothesize that the weight space of an LLM forms a \textbf{hierarchical manifold} 
+composed of three structural regimes:
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Functional Manifold} $\mathcal{W}_{func}$ – smooth low-curvature regions supporting generalizable functions.
+  \item \textbf{Off-Manifold Islands} $\mathcal{W}_{sens}$ – isolated, sparse regions memorizing specific data.
+  \item \textbf{High-Curvature Spikes} $\mathcal{W}_{both}$ – regions of dual functional and sensitive coupling.
+\end{itemize}
+
+Formally:
+\[
+\mathcal{W} = \mathcal{W}_{func} \cup \mathcal{W}_{sens} \cup \mathcal{W}_{both}
+\]
+
+\subsection{Observable Metrics}
+
+\begin{table}[h]
+\centering
+\caption{Measurable Features of Functional and Sensitive Outlier Structures}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Structure & Type & Curv. $\kappa$ & Hessian Spec. & Sparsity & Align. & Validation \\ 
+\midrule
+Main Manifold & Func. & Low & Small–Medium & Low & High & PCA \\
+Islands & Sens. & Variable & Minor & High & Low & UMAP \\
+Spikes & Both & Very High & Outlier & High & Very High & Hessian \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The separability of these manifolds is non-linear; we use Hessian eigen-decomposition and 
+UMAP/t-SNE projection. Fidelity is verified by the \emph{Neighborhood Preservation Ratio} (NPR):
+
+\begin{equation}
+NPR = \frac{1}{N}\sum_i \frac{|N_k^{high}(i) \cap N_k^{low}(i)|}{k}
+\end{equation}
+
+An NPR above 0.8 indicates reliable embedding.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Geometric-Guided Perturbation Experiment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We apply Gaussian perturbations to parameter subspaces and observe accuracy (PPL) and privacy (MIA AUC) responses.
+
+\begin{align}
+\mathbf{w}'_i &= \mathbf{w}_i + \mathcal{N}(0,\sigma_i^2), \\
+\Phi(\sigma_i) &= (\Delta \text{PPL}(\sigma_i), \Delta \text{AUC}(\sigma_i))
+\end{align}
+
+Each $\Phi(\sigma_i)$ defines a trajectory in the \emph{Perturbation Response Mapping (PRM)} plane, 
+distinguishing $\mathcal{W}_{func}$, $\mathcal{W}_{sens}$, and $\mathcal{W}_{both}$.
+
+\begin{figure}[h]
+\centering
+\input{figs.tex}
+\caption{Illustration of perturbation response trajectories for functional, sensitive, and mixed outlier subspaces.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{GPTQ Lattice-Theoretic Framework}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Quantization is reformulated as a lattice nearest vector problem (CVP).  
+For a linear layer:
+\[
+Y = XW, \quad X \in \mathbb{R}^{n\times c}, \quad W \in \mathbb{R}^{c\times d}
+\]
+We minimize:
+\begin{equation}
+\min_{\mathbf{z}\in \mathbb{Z}^c} \|X\mathbf{w} - sX\mathbf{z}\|_2^2
+\end{equation}
+The lattice basis:
+\[
+B = sX
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{QR Decomposition and Numerical Stability}
+We compute a QR factorization:
+\[
+B = QR, \quad Q\in\mathbb{R}^{n\times c}, R\in\mathbb{R}^{c\times c}
+\]
+Babai’s algorithm operates in the $R$-space, ensuring numerical stability.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Babai Error Bound}
+\begin{equation}
+\|\mathbf{v}-\mathbf{t}\|_2^2 \le \frac{1}{4}\sum_{i=1}^{c}\|\mathbf{b}^*_i\|_2^2
+\end{equation}
+where $\mathbf{b}_i^*$ are Gram–Schmidt orthogonalized basis vectors.
+
+We define:
+\[
+\eta = \frac{1}{c}\sum_i\|\mathbf{b}^*_i\|_2, \quad 
+\mathcal{S} = \frac{1}{1+\text{Var}_X[\kappa(B)]}
+\]
+representing the \textit{Lattice Orthogonality Tensor Norm (LOTN)} and \textit{Lattice Stability Index (LSI)} respectively.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sample Dependency and Stability}
+Bootstrapped calibration subsets $X_i$ yield $B_i = sX_i$ and corresponding condition numbers $\kappa(B_i)$.
+Variance of $\kappa(B_i)$ quantifies geometry stability.
+A higher $\mathcal{S}$ (closer to 1) indicates robust lattice structure.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Empirical Verification}
+We expect a strong correlation between $\log(\kappa(B))$ and $\log(MSE)$ across layers:
+\[
+\rho = \text{Spearman}(\log(\kappa(B)), \log(MSE)) > 0.7
+\]
+\begin{figure}[h]
+\centering
+\input{figs.tex}
+\caption{Hypothesized correlation between lattice condition number and quantization error across layers.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experimental Implementation Details}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[h]
+\centering
+\caption{Implementation Summary of Geometric–Lattice Framework}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Module & Tool & Input & Output & Metric \\ 
+\midrule
+Hessian Spectrum & PyTorch + Lanczos & Weights & Eigenvalues & Curv. \\
+UMAP Cluster & UMAP-learn & Activations & 2D Embedding & NPR \\
+Noise Injection & NumPy + PyTorch & Params & ΔPPL/ΔAUC & PRM \\
+Lattice Compute & SciPy.linalg.qr & X & B= sX, R & κ(B), LSI \\
+Visualization & Matplotlib & Logs & Phase Plots & Correlation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+We developed a unified framework that bridges the geometry of outliers and the algebra of quantization.
+The Functional–Sensitive Geometric Decomposition (FSGD) and Lattice-Theoretic Extension of GPTQ provide 
+a path to understand and mitigate the privacy–accuracy duality in model compression.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
