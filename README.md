@@ -155,6 +155,21 @@ $\underset{\mathbf{z} \in \mathbb{Z}^{c}}{\arg\min} ||X\mathbf{w} - sX\mathbf{z}
 
 实验预期：当 $n \geq 2c$ 时，变异系数可控制在5%以内
 
+**格几何稳定性指数（LSI）**：
+
+**定义1**：设 $X_1, ..., X_k$ 为 $k$ 个独立采样的校准集，$B_i$ 为基于 $X_i$ 构建的格基矩阵，定义：
+
+$$\mathcal{S} = \frac{1}{1 + \text{Var}_X}$$
+
+其中 $\text{Var}_X = \frac{1}{k-1} \sum_{i=1}^k (\kappa(B_i) - \bar{\kappa})^2$
+
+$\mathcal{S} \in (0, 1]$，值越接近1表明格结构越稳定。
+
+实验验证：
+- 随机生成 $k=10$ 个校准集（每个 $n=100$ 样本）
+- 计算 $\mathcal{S}$ 与MSE的斯皮尔曼等级相关系数
+- 预期显著负相关（$p < 0.01$）
+
 #### 4.3 理论启示：继承的误差界
 
 ##### 4.3.1 误差界的解析式与LLM量化含义
@@ -163,7 +178,22 @@ $\underset{\mathbf{z} \in \mathbb{Z}^{c}}{\arg\min} ||X\mathbf{w} - sX\mathbf{z}
 
 $$||\mathbf{v} - \mathbf{t}|| \leq \frac{1}{2}\sum_{i=1}^c ||\mathbf{b}_i^*||$$
 
-其中 $\mathbf{b}_i^*$ 是格基经格拉姆-施密特正交化后的第 $i$ 个向量
+其中 $\mathbf{b}_i^*$ 是格基经格拉姆-施密特正交化后的第 $i$ 个向量：
+
+$$\mathbf{b}_1^* = \mathbf{b}_1, \quad \mathbf{b}_i^* = \mathbf{b}_i - \sum_{j=1}^{i-1} \frac{\langle \mathbf{b}_i, \mathbf{b}_j^* \rangle}{\langle \mathbf{b}_j^*, \mathbf{b}_j^* \rangle} \mathbf{b}_j^*$$
+
+**格正交性缺陷度（LOD）**：
+
+**定义2**：设格基矩阵 $B \in \mathbb{R}^{n \times c}$ 的列向量为 $\{\mathbf{b}_1, ..., \mathbf{b}_c\}$，则：
+
+$$\eta = \frac{1}{c} \sum_{i=1}^c ||\mathbf{b}_i^*||_2$$
+
+- $\eta$ 值越小，格基正交性越好，误差界越紧
+- 量化格基偏离正交性的程度，直接关联Hessian谱分布
+
+实验验证要求：
+1. 验证 $\eta$ 与 $\Delta$PPL 的正相关性（预期 $r \geq 0.6$）
+2. 对高 $\eta$ 层应用LLL后，$\Delta$PPL 降低幅度（预期 $\geq 15\%$）
 
 **物理含义拆解**：
 
@@ -196,8 +226,15 @@ $$||\mathbf{v} - \mathbf{t}|| \leq \frac{1}{2}\sum_{i=1}^c ||\mathbf{b}_i^*||$$
 
 几何正则化——最小化基向量"长度乘积"与"正交性偏差"，输出"短且接近正交"的新基 $B'$
 
+**形式化优化目标**：
+
+$$\min_{\text{幺模矩阵 } U} \prod_{i=1}^c ||(BU)^*_i||_2$$
+
+其中 $U$ 为幺模矩阵（行列式为 $\pm 1$），保证格结构不变。
+
 **预期效果**（LLM底层，$\kappa(B) > 100$）：
 - 条件数降低30%-50%
+- 格正交性缺陷度 $\eta$ 降低 $\geq 30\%$
 - 重构误差RE减少15%-20%
 - 时间复杂度 $O(c^3 \log \max ||\mathbf{b}_i||)$，$c \leq 1024$ 时可实时完成
 
@@ -230,9 +267,13 @@ $$||\mathbf{v} - \mathbf{t}|| \leq \frac{1}{2}\sum_{i=1}^c ||\mathbf{b}_i^*||$$
 - 找到等价但几何性质更优的新基 $B'$（更短、更正交）
 - 从理论上收紧误差界，实现更高量化精度
 
-#### 4.4 几何可分离性假说
+#### 4.4 功能-敏感几何分解（FSGD）框架
 
-**核心假设**：功能型与敏感型离群点在权重空间中占据几何上可分离的区域
+大语言模型权重空间的高维几何结构并非均质化分布，而是由具有不同功能与隐私属性的子结构构成。我们提出**功能-敏感几何分解（Functional-Sensitive Geometric Decomposition, FSGD）**框架，将权重空间划分为三类可观测的几何子结构。
+
+**FSGD核心假设**：
+
+模型的功能性参数与敏感性参数在权重高维空间中占据几何可分离的区域，这种分离可通过局部曲率、Hessian谱特征、激活模式等量化指标表征。
 
 ##### 4.4.1 可分离性的性质：非线性流形与可观测性边界
 
@@ -286,7 +327,19 @@ $$||\mathbf{v} - \mathbf{t}|| \leq \frac{1}{2}\sum_{i=1}^c ||\mathbf{b}_i^*||$$
    - 几何引导扰动：基于几何方法划分"功能区"和"敏感区"
    - 双指标测量：同时测量 $\Delta \text{PPL}$ 和 $\Delta \text{MIA AUC}$
 
-##### 4.4.3 流形保持性检验与扰动相图设计
+##### 4.4.3 扰动响应映射（PRM）与相空间验证
+
+为实证检验FSGD框架的几何分离性，我们引入**扰动响应映射（Perturbation Response Mapping, PRM）**，定量刻画参数子空间的扰动对精度与隐私指标的耦合影响。
+
+**定义3（PRM函数）**：
+
+设参数子空间为 $\mathcal{W}_i \subseteq \mathbb{R}^n$，对 $\mathcal{W}_i$ 施加均值为0、标准差为 $\sigma_i$ 的高斯扰动后，联合响应定义为：
+
+$$\Phi(\sigma_i) = (\Delta \text{PPL}(\sigma_i), \Delta \text{AUC}(\sigma_i))$$
+
+其中：
+- $\Delta \text{PPL} = \text{PPL}(\mathcal{W}_i + \mathcal{N}(0, \sigma_i^2)) - \text{PPL}(\mathcal{W}_i)$
+- $\Delta \text{AUC} = \text{AUC}(\mathcal{W}_i + \mathcal{N}(0, \sigma_i^2)) - \text{AUC}(\mathcal{W}_i)$
 
 **流形保持性检验**：
 
@@ -311,12 +364,17 @@ $$||\mathbf{v} - \mathbf{t}|| \leq \frac{1}{2}\sum_{i=1}^c ||\mathbf{b}_i^*||$$
 
 3. **二维相图绘制**：对每个 $\sigma_i$，测量 $\Delta$PPL（精度指标）和 $\Delta$AUC（MIA成功率，隐私指标），绘制以 $\Delta$PPL 为x轴、$\Delta$AUC 为y轴的相图
 
-预期相图模式：
-- **扰动 $\mathcal{W}_{\text{func}}$**：$\Delta$PPL 急剧上升，$\Delta$AUC 变化平缓（轨迹沿x轴延伸）
-- **扰动 $\mathcal{W}_{\text{sens}}$**：$\Delta$AUC 显著下降，$\Delta$PPL 变化较小（轨迹沿y轴延伸）
-- **扰动 $\mathcal{W}_{\text{both}}$**：同时引发 $\Delta$PPL 上升与 $\Delta$AUC 下降（对角线轨迹）
+**PRM轨迹族的预期特征**：
 
-通过相图中轨迹的分离度，量化验证三类结构的功能-隐私属性差异
+- **$\mathcal{W}_{\text{func}}$ 的PRM轨迹**：主要沿 $\Delta$PPL 轴正方向延伸（$\Delta$PPL $\geq 0.3$，$\Delta$AUC $< 0.1$），表明扰动主要损害精度，对隐私影响微弱
+
+- **$\mathcal{W}_{\text{sens}}$ 的PRM轨迹**：主要沿 $\Delta$AUC 轴负方向延伸（$\Delta$AUC $\leq -0.1$，$\Delta$PPL $< 0.3$），表明扰动主要降低隐私风险，对精度影响较小
+
+- **$\mathcal{W}_{\text{both}}$ 的PRM轨迹**：在两轴均有显著变化（$\Delta$PPL $\geq 0.3$ 且 $\Delta$AUC $\leq -0.1$），表明精度-隐私耦合性
+
+**几何分离度的量化**：
+
+通过**核密度估计（KDE）**对PRM轨迹族进行聚类，计算不同子空间轨迹的欧氏距离。建议显著性阈值：轨迹间距离 $\geq 2$ 个标准差。
 
 **理论衔接**：
 
