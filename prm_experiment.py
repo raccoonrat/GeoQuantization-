@@ -42,7 +42,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('experiment.log'),
+        logging.FileHandler('experiment.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -102,13 +102,36 @@ def load_config(config_path: str = "experiment_config.yaml") -> ExperimentConfig
         with open(config_path, 'r', encoding='utf-8') as f:
             config_dict = yaml.safe_load(f)
         
-        # Flatten nested config
-        flat_config = {}
-        for section, values in config_dict.items():
-            if isinstance(values, dict):
-                flat_config.update(values)
-            else:
-                flat_config[section] = values
+        # Extract values from nested structure
+        model_config = config_dict.get('model', {})
+        dataset_config = config_dict.get('dataset', {})
+        experiment_config = config_dict.get('experiment', {})
+        geometry_config = config_dict.get('geometry', {})
+        
+        # Build flat config
+        flat_config = {
+            'model_name': model_config.get('name', 'facebook/opt-125m'),
+            'device': model_config.get('device', 'auto'),
+            'max_length': model_config.get('max_length', 256),
+            'batch_size': model_config.get('batch_size', 8),
+            'calib_name': dataset_config.get('calib_name', 'wikitext'),
+            'calib_subset': dataset_config.get('calib_subset', 'wikitext-2-raw-v1'),
+            'calib_samples': dataset_config.get('calib_samples', 200),
+            'eval_samples': dataset_config.get('eval_samples', 200),
+            'seed': experiment_config.get('seed', 42),
+            'topk_eigenvectors': experiment_config.get('topk_eigenvectors', 50),
+            'noise_sigmas': experiment_config.get('noise_sigmas', [0.0, 1e-6, 1e-5, 1e-4, 1e-3]),
+            'repeats': experiment_config.get('repeats', 3),
+            'output_dir': experiment_config.get('output_dir', 'prm_outputs'),
+            'umap_n_neighbors': geometry_config.get('umap', {}).get('n_neighbors', 15),
+            'umap_min_dist': geometry_config.get('umap', {}).get('min_dist', 0.1),
+            'dbscan_eps': geometry_config.get('clustering', {}).get('eps', 0.5),
+            'dbscan_min_samples': geometry_config.get('clustering', {}).get('min_samples', 5),
+            'func_cos_min': geometry_config.get('thresholds', {}).get('func_cos_min', 0.7),
+            'func_sparsity_max': geometry_config.get('thresholds', {}).get('func_sparsity_max', 0.5),
+            'sens_cos_max': geometry_config.get('thresholds', {}).get('sens_cos_max', 0.3),
+            'sens_sparsity_min': geometry_config.get('thresholds', {}).get('sens_sparsity_min', 0.9),
+        }
         
         return ExperimentConfig(**flat_config)
     else:
