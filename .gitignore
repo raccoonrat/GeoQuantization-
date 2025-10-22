@@ -1,329 +1,352 @@
-## Core latex/pdflatex auxiliary files:
-*.aux
-*.lof
+# GeoQuantization Project .gitignore
+# 忽略日志、中间结果、模型文件、数据集等
+
+# ===========================================
+# Python 相关
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===========================================
+# 虚拟环境
+# ===========================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+
+# ===========================================
+# IDE 和编辑器
+# ===========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===========================================
+# Jupyter Notebook
+# ===========================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ===========================================
+# 实验输出和结果
+# ===========================================
+# 实验输出目录
+prm_outputs/
+outputs/
+results/
+experiments/
+logs/
+
+# 日志文件
 *.log
-*.lot
-*.fls
+*.out
+*.err
+experiment.log
+safe_experiment.log
+minimal_experiment.log
+
+# 结果文件
+*.json
+*.csv
+*.tsv
+*.xlsx
+*.xls
+pilot_results.*
+safe_results.*
+minimal_results.*
+
+# 图片和可视化
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.pdf
+*.eps
+plots/
+figures/
+images/
+
+# ===========================================
+# 模型文件和权重
+# ===========================================
+# HuggingFace 模型缓存
+hf_cache/
+.cache/
+huggingface/
+transformers_cache/
+
+# 模型权重文件
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.onnx
+*.tflite
+*.pb
+
+# 模型目录
+models/
+checkpoints/
+weights/
+pretrained/
+
+# ===========================================
+# 数据集文件
+# ===========================================
+# 数据集目录
+data/
+datasets/
+dataset/
+raw_data/
+processed_data/
+
+# 数据集文件
+*.csv
+*.tsv
+*.json
+*.jsonl
+*.txt
+*.parquet
+*.arrow
+*.feather
+
+# 压缩文件
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# ===========================================
+# 临时文件和缓存
+# ===========================================
+# 临时文件
+tmp/
+temp/
+.tmp/
+.temp/
+
+# 缓存文件
+.cache/
+cache/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# 系统临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+
+# ===========================================
+# 编译和构建文件
+# ===========================================
+# LaTeX 编译文件
+*.aux
+*.log
 *.out
 *.toc
-*.fmt
-*.fot
-*.cb
-*.cb2
-.*.lb
-
-## Intermediate documents:
-*.dvi
-*.xdv
-*-converted-to.*
-# these rules might exclude image files for figures etc.
-# *.ps
-# *.eps
-# *.pdf
-
-## Generated if empty string is given at "Please type another file name for output:"
-.pdf
-
-## Bibliography auxiliary files (bibtex/biblatex/biber):
-*.bbl
-*.bbl-SAVE-ERROR
-*.bcf
-*.bcf-SAVE-ERROR
-*.blg
-*-blx.aux
-*-blx.bib
-*.run.xml
-
-## Build tool auxiliary files:
 *.fdb_latexmk
-*.synctex
-*.synctex(busy)
+*.fls
 *.synctex.gz
-*.synctex.gz(busy)
-*.pdfsync
-*.rubbercache
-rubber.cache
-
-## Build tool directories for auxiliary files
-# latexrun
-latex.out/
-
-## Auxiliary and intermediate files from other packages:
-# algorithms
-*.alg
-*.loa
-
-# achemso
-acs-*.bib
-
-# amsthm
-*.thm
-
-# attachfile2
-*.atfi
-
-# beamer
+*.pytxcode
+*.bbl
+*.blg
+*.idx
+*.ind
+*.ilg
+*.lof
+*.lot
 *.nav
-*.pre
 *.snm
 *.vrb
 
-# changes
-*.soc
-*.loc
+# ===========================================
+# 操作系统文件
+# ===========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
-# comment
-*.cut
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
-# cprotect
-*.cpt
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
 
-# elsarticle (documentclass of Elsevier journals)
-*.spl
+# ===========================================
+# 特定于项目的文件
+# ===========================================
+# 实验配置文件（如果包含敏感信息）
+# experiment_config.yaml
+# safe_config.yaml
 
-# endnotes
-*.ent
+# 本地环境配置
+.env
+.env.local
+.env.development
+.env.test
+.env.production
 
-# fixme
-*.lox
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
 
-# feynmf/feynmp
-*.mf
-*.mp
-*.t[1-9]
-*.t[1-9][0-9]
-*.tfm
+# ===========================================
+# 大文件和二进制文件
+# ===========================================
+# 大文件（通常 > 100MB）
+*.large
+*.big
+*.huge
 
-#(r)(e)ledmac/(r)(e)ledpar
-*.end
-*.?end
-*.[1-9]
-*.[1-9][0-9]
-*.[1-9][0-9][0-9]
-*.[1-9]R
-*.[1-9][0-9]R
-*.[1-9][0-9][0-9]R
-*.eledsec[1-9]
-*.eledsec[1-9]R
-*.eledsec[1-9][0-9]
-*.eledsec[1-9][0-9]R
-*.eledsec[1-9][0-9][0-9]
-*.eledsec[1-9][0-9][0-9]R
+# 二进制文件
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
 
-# glossaries
-*.acn
-*.acr
-*.glg
-*.glg-abr
-*.glo
-*.glo-abr
-*.gls
-*.gls-abr
-*.glsdefs
-*.lzo
-*.lzs
-*.slg
-*.slo
-*.sls
+# ===========================================
+# 版本控制
+# ===========================================
+# Git 相关
+.git/
+.gitignore.bak
 
-# uncomment this for glossaries-extra (will ignore makeindex's style files!)
-# *.ist
+# ===========================================
+# 文档生成
+# ===========================================
+# Sphinx 文档
+docs/_build/
+docs/build/
 
-# gnuplot
-*.gnuplot
-*.table
+# ===========================================
+# 测试覆盖率
+# ===========================================
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
 
-# gnuplottex
-*-gnuplottex-*
+# ===========================================
+# 包管理
+# ===========================================
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
 
-# gregoriotex
-*.gaux
-*.glog
-*.gtex
+# conda
+.conda/
+conda-meta/
 
-# htlatex
-*.4ct
-*.4tc
-*.idv
-*.lg
-*.trc
-*.xref
+# ===========================================
+# 特定工具
+# ===========================================
+# Weights & Biases
+wandb/
 
-# hypdoc
-*.hd
+# TensorBoard
+runs/
+logs/
 
-# hyperref
-*.brf
+# MLflow
+mlruns/
 
-# knitr
-*-concordance.tex
-# TODO Uncomment the next line if you use knitr and want to ignore its generated tikz files
-# *.tikz
-*-tikzDictionary
+# DVC
+.dvc/
+*.dvc
 
-# latexindent will create succesive backup files by default
-#*.bak*
+# ===========================================
+# 项目特定文件
+# ===========================================
+# 实验方案PDF
+实验方案.pdf
 
-# listings
-*.lol
+# 特定日志文件
+test_echo.log
 
-# luatexja-ruby
-*.ltjruby
+# 特定测试文件
+test_chinese.*
+test_packages.*
 
-# makeidx
-*.idx
-*.ilg
-*.ind
-
-# minitoc
-*.maf
-*.mlf
-*.mlt
-*.mtc[0-9]*
-*.slf[0-9]*
-*.slt[0-9]*
-*.stc[0-9]*
-
-# minted
-_minted*
-*.data.minted
-*.pyg
-
-# morewrites
-*.mw
-
-# newpax
-*.newpax
-
-# nomencl
-*.nlg
-*.nlo
-*.nls
-
-# pax
-*.pax
-
-# pdfpcnotes
-*.pdfpc
-
-# sagetex
-*.sagetex.sage
-*.sagetex.py
-*.sagetex.scmd
-
-# scrwfile
-*.wrt
-
-# spelling
-*.spell.bad
-*.spell.txt
-
-# svg
-svg-inkscape/
-
-# sympy
-*.sout
-*.sympy
-sympy-plots-for-*.tex/
-
-# pdfcomment
-*.upa
-*.upb
-
-# pythontex
-*.pytxcode
-pythontex-files-*/
-
-# tcolorbox
-*.listing
-
-# thmtools
-*.loe
-
-# TikZ & PGF
-*.dpth
-*.md5
-*.auxlock
-
-# titletoc
-*.ptc
-
-# todonotes
-*.tdo
-
-# vhistory
-*.hst
-*.ver
-
-# easy-todo
-*.lod
-
-# xcolor
-*.xcp
-
-# xmpincl
-*.xmpi
-
-# xindy
-*.xdy
-
-# xypic precompiled matrices and outlines
-*.xyc
-*.xyd
-
-# endfloat
-*.ttt
-*.fff
-
-# Latexian
-TSWLatexianTemp*
-
-## Editors:
-# WinEdt
-*.bak
-*.sav
-
-# latexindent.pl
-*.bak[0-9]*
-
-# Texpad
-.texpadtmp
-
-# LyX
-*.lyx~
-
-# Kile
-*.backup
-
-# gummi
-.*.swp
-
-# KBibTeX
-*~[0-9]*
-
-# TeXnicCenter
-*.tps
-
-# auto folder when using emacs and auctex
-./auto/*
-*.el
-
-# expex forward references with \gathertags
-*-tags.tex
-
-# standalone packages
-*.sta
-
-# Makeindex log files
-*.lpz
-
-# xwatermark package
-*.xwm
-
-# REVTeX puts footnotes in the bibliography by default, unless the nofootinbib
-# option is specified. Footnotes are the stored in a file with suffix Notes.bib.
-# Uncomment the next line to have this generated file ignored.
-#*Notes.bib
-
-*.docx
-*.pdf
+# ===========================================
+# 注释说明
+# ===========================================
+# 如果需要保留某些文件，可以取消注释并修改
+# !important_file.txt
+# !config.yaml
+# !README.md
