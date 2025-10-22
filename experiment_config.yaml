@@ -56,3 +56,11 @@ logging:
   save_plots: true
   save_csv: true
   wandb_project: "geo_quantization"
+
+# HuggingFace Mirror Configuration
+huggingface:
+  endpoint: "https://hf-mirror.com"  # 使用镜像网站
+  disable_telemetry: true
+  disable_progress_bars: true
+  offline: false
+  cache_dir: "./hf_cache"  # 本地缓存目录
