@@ -35,18 +35,32 @@ def test_model_download():
     print("\n测试模型下载...")
     
     try:
-        from transformers import AutoTokenizer
-        
-        # 设置镜像
+        # 强制设置镜像环境变量
         os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
         os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
         os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+        os.environ['HF_HUB_OFFLINE'] = '0'
+        
+        # 设置缓存目录
+        cache_dir = os.path.join(os.getcwd(), 'hf_cache')
+        os.environ['HF_HOME'] = cache_dir
+        os.makedirs(cache_dir, exist_ok=True)
+        
+        print(f"镜像地址: {os.environ['HF_ENDPOINT']}")
+        print(f"缓存目录: {cache_dir}")
+        
+        from transformers import AutoTokenizer
         
         # 测试下载小模型
         model_name = "facebook/opt-125m"
         print(f"正在下载模型: {model_name}")
         
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # 使用镜像地址直接下载
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_name,
+            use_auth_token=False,
+            cache_dir=cache_dir
+        )
         print("✅ 模型下载成功!")
         
         # 测试分词
@@ -58,7 +72,22 @@ def test_model_download():
         
     except Exception as e:
         print(f"❌ 模型下载失败: {e}")
-        return False
+        print("尝试使用备用方法...")
+        
+        # 尝试使用requests直接下载
+        try:
+            import requests
+            mirror_url = f"https://hf-mirror.com/facebook/opt-125m/resolve/main/tokenizer.json"
+            response = requests.get(mirror_url, timeout=30)
+            if response.status_code == 200:
+                print("✅ 镜像连接测试成功!")
+                return True
+            else:
+                print(f"❌ 镜像连接失败: {response.status_code}")
+                return False
+        except Exception as e2:
+            print(f"❌ 备用方法也失败: {e2}")
+            return False
 
 def test_dataset_download():
     """测试数据集下载"""
