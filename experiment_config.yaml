@@ -1,0 +1,58 @@
+# GeoQuantization Experiment Configuration
+# 实验配置文件
+
+# Model settings
+model:
+  name: "facebook/opt-125m"  # 默认小模型用于pilot
+  device: "auto"  # auto, cuda, cpu
+  max_length: 256
+  batch_size: 8
+
+# Dataset settings
+dataset:
+  calib_name: "wikitext"
+  calib_subset: "wikitext-2-raw-v1"
+  calib_samples: 200
+  eval_samples: 200
+  max_tokens: 512
+
+# Experiment parameters
+experiment:
+  seed: 42
+  topk_eigenvectors: 50
+  noise_sigmas: [0.0, 1e-6, 1e-5, 1e-4, 1e-3]
+  repeats: 3
+  output_dir: "prm_outputs"
+
+# Geometric analysis
+geometry:
+  # UMAP parameters
+  umap:
+    n_neighbors: 15
+    min_dist: 0.1
+    n_components: 2
+  
+  # DBSCAN clustering
+  clustering:
+    eps: 0.5
+    min_samples: 5
+  
+  # Partition thresholds
+  thresholds:
+    func_cos_min: 0.7
+    func_sparsity_max: 0.5
+    sens_cos_max: 0.3
+    sens_sparsity_min: 0.9
+
+# Statistical analysis
+statistics:
+  confidence_level: 0.95
+  multiple_testing: "benjamini_hochberg"
+  effect_size_threshold: 0.1
+
+# Logging
+logging:
+  level: "INFO"
+  save_plots: true
+  save_csv: true
+  wandb_project: "geo_quantization"
