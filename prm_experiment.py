@@ -50,6 +50,45 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # -----------------------------
+# Proxy Configuration
+# -----------------------------
+def configure_proxy():
+    """配置代理设置"""
+    # 检查SOCKS5代理设置
+    socks_proxy = None
+    for var in ['SOCKS_PROXY', 'socks_proxy', 'ALL_PROXY', 'all_proxy']:
+        value = os.environ.get(var)
+        if value and 'socks5' in value.lower():
+            socks_proxy = value
+            break
+    
+    if socks_proxy:
+        logger.info(f"检测到SOCKS5代理: {socks_proxy}")
+        
+        # 将socks5h转换为socks5
+        if 'socks5h://' in socks_proxy:
+            new_proxy = socks_proxy.replace('socks5h://', 'socks5://')
+            logger.info(f"转换代理协议: {socks_proxy} -> {new_proxy}")
+            
+            # 设置HTTP代理环境变量
+            os.environ['HTTP_PROXY'] = new_proxy
+            os.environ['HTTPS_PROXY'] = new_proxy
+            os.environ['http_proxy'] = new_proxy
+            os.environ['https_proxy'] = new_proxy
+    
+    # 设置HuggingFace配置
+    os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
+    os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+    
+    # 设置镜像（如果需要）
+    if not os.environ.get('HF_ENDPOINT'):
+        os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+        logger.info("已设置HuggingFace镜像")
+
+# 在导入后立即配置代理
+configure_proxy()
+
+# -----------------------------
 # Configuration Management
 # -----------------------------
 @dataclass
