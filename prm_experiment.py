@@ -85,8 +85,25 @@ def configure_proxy():
         os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
         logger.info("已设置HuggingFace镜像")
 
-# 在导入后立即配置代理
+def configure_huggingface_mirror():
+    """配置HuggingFace镜像"""
+    # 设置HuggingFace镜像
+    os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+    os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
+    os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+    os.environ['HF_HUB_OFFLINE'] = '0'
+    
+    # 设置缓存目录
+    cache_dir = os.path.join(os.getcwd(), 'hf_cache')
+    os.environ['HF_HOME'] = cache_dir
+    os.makedirs(cache_dir, exist_ok=True)
+    
+    logger.info(f"已配置HuggingFace镜像: {os.environ['HF_ENDPOINT']}")
+    logger.info(f"缓存目录: {cache_dir}")
+
+# 在导入后立即配置代理和镜像
 configure_proxy()
+configure_huggingface_mirror()
 
 # -----------------------------
 # Configuration Management
@@ -147,6 +164,7 @@ def load_config(config_path: str = "experiment_config.yaml") -> ExperimentConfig
         dataset_config = config_dict.get('dataset', {})
         experiment_config = config_dict.get('experiment', {})
         geometry_config = config_dict.get('geometry', {})
+        hf_config = config_dict.get('huggingface', {})
         
         # Build flat config
         flat_config = {
@@ -172,6 +190,18 @@ def load_config(config_path: str = "experiment_config.yaml") -> ExperimentConfig
             'sens_cos_max': geometry_config.get('thresholds', {}).get('sens_cos_max', 0.3),
             'sens_sparsity_min': geometry_config.get('thresholds', {}).get('sens_sparsity_min', 0.9),
         }
+        
+        # 应用HuggingFace镜像配置
+        if hf_config:
+            os.environ['HF_ENDPOINT'] = hf_config.get('endpoint', 'https://hf-mirror.com')
+            os.environ['HF_HUB_DISABLE_TELEMETRY'] = str(hf_config.get('disable_telemetry', True)).lower()
+            os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = str(hf_config.get('disable_progress_bars', True)).lower()
+            
+            cache_dir = hf_config.get('cache_dir', './hf_cache')
+            os.environ['HF_HOME'] = cache_dir
+            os.makedirs(cache_dir, exist_ok=True)
+            
+            logger.info(f"应用HuggingFace镜像配置: {os.environ['HF_ENDPOINT']}")
         
         return ExperimentConfig(**flat_config)
     else:

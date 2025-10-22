@@ -20,6 +20,17 @@ os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:64'
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['MKL_NUM_THREADS'] = '1'
 
+# 设置HuggingFace镜像
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
+os.environ['HF_HUB_DISABLE_PROGRESS_BARS'] = '1'
+os.environ['HF_HUB_OFFLINE'] = '0'
+
+# 设置缓存目录
+cache_dir = os.path.join(os.getcwd(), 'hf_cache')
+os.environ['HF_HOME'] = cache_dir
+os.makedirs(cache_dir, exist_ok=True)
+
 # 设置日志
 logging.basicConfig(
     level=logging.INFO,
