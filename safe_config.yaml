@@ -1,0 +1,62 @@
+# 安全实验配置 - 避免GPU内存不足和WSL崩溃
+# Safe Experiment Configuration
+
+# Model settings - 强制CPU模式
+model:
+  name: "facebook/opt-125m"  # 使用最小模型
+  device: "cpu"  # 强制CPU模式
+  max_length: 64  # 减少最大长度
+  batch_size: 1  # 最小批次大小
+
+# Dataset settings - 减少数据量
+dataset:
+  calib_name: "wikitext"
+  calib_subset: "wikitext-2-raw-v1"
+  calib_samples: 20  # 大幅减少样本数
+  eval_samples: 20
+  max_tokens: 64  # 减少token数量
+
+# Experiment parameters - 最小化配置
+experiment:
+  seed: 42
+  topk_eigenvectors: 10  # 减少特征向量数
+  noise_sigmas: [0.0, 0.01, 0.1]  # 减少噪声测试点
+  repeats: 1  # 减少重复次数
+  output_dir: "prm_outputs"
+
+# Geometric analysis - 简化配置
+geometry:
+  umap:
+    n_neighbors: 5  # 减少邻居数
+    min_dist: 0.1
+    n_components: 2
+  clustering:
+    eps: 0.5
+    min_samples: 2  # 减少最小样本数
+  thresholds:
+    func_cos_min: 0.7
+    func_sparsity_max: 0.5
+    sens_cos_max: 0.3
+    sens_sparsity_min: 0.9
+
+# Memory optimization
+memory:
+  max_memory_usage: 0.8  # 最大内存使用率
+  cleanup_frequency: 10  # 清理频率
+  use_cpu_only: true  # 强制CPU模式
+  low_memory_mode: true  # 低内存模式
+
+# HuggingFace Mirror Configuration
+huggingface:
+  endpoint: "https://hf-mirror.com"
+  disable_telemetry: true
+  disable_progress_bars: true
+  offline: false
+  cache_dir: "./hf_cache"
+
+# Safety settings
+safety:
+  max_runtime: 300  # 最大运行时间（秒）
+  memory_check_interval: 30  # 内存检查间隔
+  auto_cleanup: true  # 自动清理
+  crash_protection: true  # 崩溃保护
