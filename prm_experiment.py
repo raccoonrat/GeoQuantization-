@@ -17,6 +17,7 @@ import logging
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Any, Optional
 from pathlib import Path
+from urllib.parse import urlparse
 
 import numpy as np
 import torch
