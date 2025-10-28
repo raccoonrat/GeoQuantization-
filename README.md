@@ -479,23 +479,62 @@ GPTQ的格定义于输出激活空间的 $c$ 维子空间中（而非完整的 $
 
 ---
 
-## 📖 文档结构
+## 📖 项目结构
 
 ```
 GeoQuantization-/
-├── GeoQ.tex                          # 主论文（LaTeX源文件）
-├── GeoQ.pdf                          # 编译后的PDF
-├── references.bib                    # 参考文献
-├── usenix2020_SOUPS.sty             # USENIX会议样式文件
-├── 修订意见1.md                      # 第一轮审稿修订意见
-├── 修订意见2.md                      # 第二轮审稿修订意见
-├── 修订意见3.md                      # 第三轮审稿修订意见
-├── 修订意见4.md                      # 第四轮审稿修订意见
-├── [5]LLM量化离群点精度隐私研究.md  # 研究笔记
-└── resource/                         # 辅助资源
-    ├── 1006-LLM 量化压缩的关键计算与改进.md
-    ├── 1006-结合微分几何的LLM量化核心问题与技术重分析.md
-    └── 基1006-于微分几何的大模型量化方法.docx
+├── papers/                           # 论文相关文件
+│   ├── GeoQ.tex                      # 主论文（LaTeX源文件）
+│   ├── GeoQ.pdf                      # 编译后的PDF
+│   ├── FSGD_zh.tex                   # FSGD论文（中文版）
+│   ├── FSGD_zh.pdf                   # FSGD论文PDF
+│   ├── outlier_quantization_paper.tex # 离群点量化论文
+│   ├── outlier_quantization_paper.pdf # 离群点量化论文PDF
+│   ├── references.bib                # 参考文献
+│   ├── usenix2019_v3.1.bib          # USENIX参考文献
+│   ├── usenix2019_v3.1.tex          # USENIX论文模板
+│   ├── usenix2019_v3.sty            # USENIX样式文件
+│   ├── usenix2020_SOUPS.sty         # USENIX SOUPS样式文件
+│   ├── figs/                         # 论文图片
+│   │   ├── framework.png
+│   │   └── Privacy-Accuracy-Dilllema.png
+│   ├── resource/                     # 辅助资源
+│   │   ├── 1006-LLM 量化压缩的关键计算与改进.md
+│   │   ├── 1006-结合微分几何的LLM量化核心问题与技术重分析.md
+│   │   ├── L1006-LM 量化压缩的协同优化与计算效率.md
+│   │   └── 基1006-于微分几何的大模型量化方法.docx
+│   ├── 修订意见1.md                  # 第一轮审稿修订意见
+│   ├── 修订意见2.md                  # 第二轮审稿修订意见
+│   ├── 修订意见3.md                  # 第三轮审稿修订意见
+│   ├── 修订意见4.md                  # 第四轮审稿修订意见
+│   └── 实验方案.pdf                   # 实验方案文档
+├── docs/                             # 项目文档
+│   ├── README_experiment.md          # 实验说明文档
+│   ├── QUICKSTART.md                 # 快速开始指南
+│   ├── A800_GPU_GUIDE.md             # A800 GPU使用指南
+│   ├── HESSIAN_MEMORY_GUIDE.md       # Hessian内存优化指南
+│   ├── GITIGNORE_GUIDE.md            # Git忽略文件指南
+│   ├── EXPERIMENT_ANALYSIS.md        # 实验分析文档
+│   ├── HESSIAN_CRASH_SOLUTION.md     # Hessian崩溃解决方案
+│   ├── MIRROR_SOLUTION.md            # 镜像源解决方案
+│   ├── NETWORK_SOLUTION.md           # 网络问题解决方案
+│   ├── PROXY_SOLUTION.md             # 代理设置解决方案
+│   ├── WSL_CRASH_SOLUTION.md         # WSL崩溃解决方案
+│   ├── WSL2_SOLUTION.md              # WSL2解决方案
+│   ├── [5]LLM量化离群点精度隐私研究.md # 研究笔记
+│   ├── 1005-修改方案.md              # 修改方案文档
+│   └── 1005-逻辑性强化修改方案.md    # 逻辑性强化修改方案
+├── code/                             # 核心代码
+│   ├── requirements.txt              # Python依赖
+│   ├── experiment_config.yaml        # 实验配置
+│   ├── safe_config.yaml              # 安全配置
+│   ├── *.py                          # Python脚本
+│   ├── *.bat                         # Windows批处理脚本
+│   └── *.sh                          # Linux Shell脚本
+├── experiments/                      # 实验相关文件
+│   └── (实验脚本和测试文件)
+├── README.md                         # 项目主文档
+└── LICENSE                           # 许可证文件
 ```
 
 ---
@@ -510,6 +549,9 @@ GeoQuantization-/
 ### 编译命令
 
 ```bash
+# 进入论文目录
+cd papers/
+
 # 标准编译
 pdflatex GeoQ.tex
 pdflatex GeoQ.tex  # 第二次编译以生成正确的交叉引用
@@ -519,7 +561,41 @@ pdflatex GeoQ.tex
 bibtex GeoQ
 pdflatex GeoQ.tex
 pdflatex GeoQ.tex
+
+# 编译FSGD论文
+pdflatex FSGD_zh.tex
+pdflatex FSGD_zh.tex
+
+# 编译离群点量化论文
+pdflatex outlier_quantization_paper.tex
+bibtex outlier_quantization_paper
+pdflatex outlier_quantization_paper.tex
+pdflatex outlier_quantization_paper.tex
 ```
+
+---
+
+## 🔧 使用指南
+
+### 快速开始
+
+1. **查看项目文档**：进入 `docs/` 目录查看各种指南和解决方案
+2. **运行实验**：进入 `code/` 目录，按照 `docs/QUICKSTART.md` 的说明运行实验
+3. **编译论文**：进入 `papers/` 目录，按照上述编译说明生成PDF
+
+### 目录说明
+
+- **`papers/`**：包含所有论文相关的LaTeX源文件、编译产物、参考文献和图片
+- **`docs/`**：包含项目文档、使用指南、问题解决方案等
+- **`code/`**：包含核心代码、配置文件、运行脚本等
+- **`experiments/`**：包含实验脚本和测试文件
+
+### 开发工作流
+
+1. 在 `code/` 目录中开发和测试代码
+2. 在 `experiments/` 目录中运行实验
+3. 在 `docs/` 目录中更新文档
+4. 在 `papers/` 目录中编写和编译论文
 
 ---
 
